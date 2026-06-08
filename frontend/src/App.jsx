@@ -4,6 +4,7 @@ import axios from "axios";
 function App() {
   const [githubUrl, setGithubUrl] = useState("");
   const [repositories, setRepositories] = useState([]);
+  const [analysis, setAnalysis] = useState(null);
 
   const fetchRepositories = async () => {
     try {
@@ -22,8 +23,6 @@ function App() {
   }, []);
 
   const importRepository = async () => {
-    console.log("Import button clicked");
-
     if (!githubUrl.includes("github.com")) {
       alert("Please enter a valid GitHub URL");
       return;
@@ -41,7 +40,6 @@ function App() {
 
       setGithubUrl("");
       fetchRepositories();
-
     } catch (error) {
       console.error(error);
 
@@ -49,6 +47,19 @@ function App() {
         error.response?.data?.error ||
         "Failed to import repository"
       );
+    }
+  };
+
+  const analyzeRepository = async (id) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/analysis/${id}`
+      );
+
+      setAnalysis(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("Analysis failed");
     }
   };
 
@@ -64,7 +75,7 @@ function App() {
       <h1>🚀 CodePilot AI</h1>
 
       <p>
-        Import GitHub repositories and view repository metadata.
+        Import GitHub repositories and analyze them.
       </p>
 
       <div style={{ marginBottom: "20px" }}>
@@ -93,6 +104,45 @@ function App() {
         </button>
       </div>
 
+      {analysis && (
+        <div
+          style={{
+            border: "2px solid #4CAF50",
+            padding: "20px",
+            borderRadius: "10px",
+            marginBottom: "20px",
+            backgroundColor: "#f8fff8",
+          }}
+        >
+          <h2>📊 Repository Analysis</h2>
+
+          <p>
+            <strong>Repository:</strong> {analysis.repository}
+          </p>
+
+          <p>
+            <strong>Owner:</strong> {analysis.owner}
+          </p>
+
+          <p>
+            <strong>Language:</strong> {analysis.language}
+          </p>
+
+          <p>
+            <strong>Stars:</strong> {analysis.stars}
+          </p>
+
+          <p>
+            <strong>Summary:</strong> {analysis.summary}
+          </p>
+
+          <p>
+            <strong>Recommendation:</strong>{" "}
+            {analysis.recommendation}
+          </p>
+        </div>
+      )}
+
       <h2>Imported Repositories</h2>
 
       {repositories.length === 0 ? (
@@ -109,40 +159,26 @@ function App() {
               boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
             }}
           >
-            <h3>{repo.repo_name || "Unknown Repository"}</h3>
+            <h3>{repo.repo_name}</h3>
 
             <p>
-              <strong>Owner:</strong>{" "}
-              {repo.owner_name || "N/A"}
+              <strong>Owner:</strong> {repo.owner_name}
             </p>
 
             <p>
-              <strong>Language:</strong>{" "}
-              {repo.language || "N/A"}
+              <strong>Language:</strong> {repo.language}
             </p>
 
             <p>
-              <strong>Stars:</strong>{" "}
-              {repo.stars || 0}
+              <strong>Stars:</strong> {repo.stars}
             </p>
 
             <p>
-              <strong>Description:</strong>{" "}
-              {repo.description || "No description available"}
-            </p>
-
-            <p>
-              <strong>Repository URL:</strong>{" "}
-              <a
-                href={repo.github_url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open Repository
-              </a>
+              <strong>Description:</strong> {repo.description}
             </p>
 
             <button
+              onClick={() => analyzeRepository(repo.id)}
               style={{
                 marginTop: "10px",
                 padding: "8px 12px",
