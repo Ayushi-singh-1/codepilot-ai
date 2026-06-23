@@ -19,12 +19,49 @@ router.get("/:id", async (req, res) => {
       });
     }
 
+    let healthScore = "";
+
+    if (repo.stars > 100000) {
+      healthScore = "Excellent";
+    } else if (repo.stars > 10000) {
+      healthScore = "Good";
+    } else if (repo.stars > 1000) {
+      healthScore = "Moderate";
+    } else {
+      healthScore = "Small Project";
+    }
+
+    let techCategory = "";
+
+    switch (repo.language) {
+      case "JavaScript":
+        techCategory = "Frontend / Web Development";
+        break;
+
+      case "TypeScript":
+        techCategory = "Scalable Web Applications";
+        break;
+
+      case "Python":
+        techCategory = "AI / Data Engineering";
+        break;
+
+      case "Java":
+        techCategory = "Enterprise Applications";
+        break;
+
+      default:
+        techCategory = "General Software Development";
+    }
+
     res.json({
       repository: repo.repo_name,
       owner: repo.owner_name,
       summary: repo.description,
       language: repo.language,
       stars: repo.stars,
+      healthScore,
+      techCategory,
       recommendation:
         "Suitable for software engineering projects and open-source contribution.",
     });

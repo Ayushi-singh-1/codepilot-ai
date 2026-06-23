@@ -1,9 +1,10 @@
-const { getRepositoryData } = require("../services/githubService");
-console.log("Repository routes loaded");
-
 const express = require("express");
 const router = express.Router();
+
 const pool = require("../db/db");
+const { getRepositoryData } = require("../services/githubService");
+
+console.log("Repository routes loaded");
 
 // GET all repositories
 router.get("/", async (req, res) => {
@@ -13,21 +14,21 @@ router.get("/", async (req, res) => {
     );
 
     res.json(result.rows);
+
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
-      error: "Server Error"
+      error: "Server Error",
     });
   }
 });
 
-// INSERT repository
+// IMOPTION PORT repository
 router.post("/import", async (req, res) => {
   try {
     const { githubUrl } = req.body;
 
-    const repoData = await getRepositoryData(githubUrl);
     const existingRepo = await pool.query(
       "SELECT * FROM repositories WHERE github_url = $1",
       [githubUrl]
@@ -38,6 +39,9 @@ router.post("/import", async (req, res) => {
         error: "Repository already imported",
       });
     }
+
+    const repoData = await getRepositoryData(githubUrl);
+
     const result = await pool.query(
       `
       INSERT INTO repositories
@@ -72,4 +76,5 @@ router.post("/import", async (req, res) => {
     });
   }
 });
+
 module.exports = router;

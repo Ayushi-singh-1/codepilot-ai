@@ -5,6 +5,7 @@ function App() {
   const [githubUrl, setGithubUrl] = useState("");
   const [repositories, setRepositories] = useState([]);
   const [analysis, setAnalysis] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchRepositories = async () => {
     try {
@@ -14,7 +15,7 @@ function App() {
 
       setRepositories(response.data);
     } catch (error) {
-      console.error("Fetch Error:", error);
+      console.error(error);
     }
   };
 
@@ -36,10 +37,11 @@ function App() {
         }
       );
 
-      alert("Repository imported successfully!");
-
       setGithubUrl("");
       fetchRepositories();
+
+      alert("Repository imported successfully!");
+
     } catch (error) {
       console.error(error);
 
@@ -57,6 +59,7 @@ function App() {
       );
 
       setAnalysis(response.data);
+
     } catch (error) {
       console.error(error);
       alert("Analysis failed");
@@ -66,7 +69,7 @@ function App() {
   return (
     <div
       style={{
-        maxWidth: "900px",
+        maxWidth: "1000px",
         margin: "0 auto",
         padding: "40px",
         fontFamily: "Arial",
@@ -110,30 +113,45 @@ function App() {
             border: "2px solid #4CAF50",
             padding: "20px",
             borderRadius: "10px",
-            marginBottom: "20px",
+            marginBottom: "25px",
             backgroundColor: "#f8fff8",
           }}
         >
           <h2>📊 Repository Analysis</h2>
 
           <p>
-            <strong>Repository:</strong> {analysis.repository}
+            <strong>Repository:</strong>{" "}
+            {analysis.repository}
           </p>
 
           <p>
-            <strong>Owner:</strong> {analysis.owner}
+            <strong>Owner:</strong>{" "}
+            {analysis.owner}
           </p>
 
           <p>
-            <strong>Language:</strong> {analysis.language}
+            <strong>Language:</strong>{" "}
+            {analysis.language}
           </p>
 
           <p>
-            <strong>Stars:</strong> {analysis.stars}
+            <strong>Stars:</strong>{" "}
+            {analysis.stars}
           </p>
 
           <p>
-            <strong>Summary:</strong> {analysis.summary}
+            <strong>Health Score:</strong>{" "}
+            {analysis.healthScore}
+          </p>
+
+          <p>
+            <strong>Technology Area:</strong>{" "}
+            {analysis.techCategory}
+          </p>
+
+          <p>
+            <strong>Summary:</strong>{" "}
+            {analysis.summary}
           </p>
 
           <p>
@@ -145,40 +163,67 @@ function App() {
 
       <h2>Imported Repositories</h2>
 
-      {repositories.length === 0 ? (
-        <p>No repositories imported yet.</p>
-      ) : (
-        repositories.map((repo) => (
+      <div style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Search repositories..."
+          value={searchTerm}
+          onChange={(e) =>
+            setSearchTerm(e.target.value)
+          }
+          style={{
+            width: "300px",
+            padding: "10px",
+            borderRadius: "6px",
+            border: "1px solid #ccc",
+          }}
+        />
+      </div>
+
+      {repositories
+        .filter((repo) =>
+          repo.repo_name
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+        .map((repo) => (
           <div
             key={repo.id}
             style={{
               border: "1px solid #ddd",
               borderRadius: "10px",
               padding: "15px",
-              marginTop: "15px",
-              boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+              marginBottom: "15px",
+              boxShadow:
+                "0 2px 5px rgba(0,0,0,0.1)",
             }}
           >
             <h3>{repo.repo_name}</h3>
 
             <p>
-              <strong>Owner:</strong> {repo.owner_name}
+              <strong>Owner:</strong>{" "}
+              {repo.owner_name}
             </p>
 
             <p>
-              <strong>Language:</strong> {repo.language}
+              <strong>Language:</strong>{" "}
+              {repo.language}
             </p>
 
             <p>
-              <strong>Stars:</strong> {repo.stars}
+              <strong>Stars:</strong>{" "}
+              {repo.stars}
             </p>
 
             <p>
-              <strong>Description:</strong> {repo.description}
+              <strong>Description:</strong>{" "}
+              {repo.description}
             </p>
 
             <button
-              onClick={() => analyzeRepository(repo.id)}
+              onClick={() =>
+                analyzeRepository(repo.id)
+              }
               style={{
                 marginTop: "10px",
                 padding: "8px 12px",
@@ -188,8 +233,7 @@ function App() {
               Analyze Repository
             </button>
           </div>
-        ))
-      )}
+        ))}
     </div>
   );
 }
