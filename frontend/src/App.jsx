@@ -41,13 +41,12 @@ function App() {
       fetchRepositories();
 
       alert("Repository imported successfully!");
-
     } catch (error) {
       console.error(error);
 
       alert(
         error.response?.data?.error ||
-        "Failed to import repository"
+          "Failed to import repository"
       );
     }
   };
@@ -59,12 +58,26 @@ function App() {
       );
 
       setAnalysis(response.data);
-
     } catch (error) {
       console.error(error);
       alert("Analysis failed");
     }
   };
+
+  // Statistics
+  const totalRepositories = repositories.length;
+
+  const totalStars = repositories.reduce(
+    (sum, repo) => sum + (repo.stars || 0),
+    0
+  );
+
+  const mostPopularRepo =
+    repositories.length > 0
+      ? repositories.reduce((prev, current) =>
+          prev.stars > current.stars ? prev : current
+        )
+      : null;
 
   return (
     <div
@@ -160,6 +173,34 @@ function App() {
           </p>
         </div>
       )}
+
+      {/* Statistics Dashboard */}
+      <div
+        style={{
+          border: "2px solid #2196F3",
+          padding: "20px",
+          borderRadius: "10px",
+          marginBottom: "25px",
+          backgroundColor: "#f5faff",
+        }}
+      >
+        <h2>📊 Repository Statistics</h2>
+
+        <p>
+          <strong>Total Repositories:</strong>{" "}
+          {totalRepositories}
+        </p>
+
+        <p>
+          <strong>Total Stars:</strong>{" "}
+          {totalStars}
+        </p>
+
+        <p>
+          <strong>Most Popular:</strong>{" "}
+          {mostPopularRepo?.repo_name || "N/A"}
+        </p>
+      </div>
 
       <h2>Imported Repositories</h2>
 
