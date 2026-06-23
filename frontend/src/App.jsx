@@ -65,6 +65,28 @@ function App() {
     }
   };
 
+  const deleteRepository = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this repository?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/repositories/${id}`
+      );
+
+      setAnalysis(null);
+      fetchRepositories();
+
+      alert("Repository deleted successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Delete failed");
+    }
+  };
+
   // Statistics
   const totalRepositories = repositories.length;
 
@@ -79,6 +101,20 @@ function App() {
           prev.stars > current.stars ? prev : current
         )
       : null;
+
+  const filteredRepositories = repositories
+    .filter((repo) =>
+      repo.repo_name
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortType === "stars") {
+        return (b.stars || 0) - (a.stars || 0);
+      }
+
+      return a.repo_name.localeCompare(b.repo_name);
+    });
 
   return (
     <div
@@ -169,7 +205,6 @@ function App() {
         </div>
       )}
 
-      {/* Statistics Dashboard */}
       <div
         style={{
           border: "2px solid #2196F3",
@@ -199,7 +234,6 @@ function App() {
 
       <h2>Imported Repositories</h2>
 
-      {/* Sorting */}
       <div style={{ marginBottom: "20px" }}>
         <button
           onClick={() => setSortType("stars")}
@@ -221,7 +255,6 @@ function App() {
         </button>
       </div>
 
-      {/* Search */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="text"
@@ -239,69 +272,69 @@ function App() {
         />
       </div>
 
-      {repositories
-        .filter((repo) =>
-          repo.repo_name
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        )
-        .sort((a, b) => {
-          if (sortType === "stars") {
-            return (b.stars || 0) - (a.stars || 0);
-          }
+      {filteredRepositories.map((repo) => (
+        <div
+          key={repo.id}
+          style={{
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            padding: "15px",
+            marginBottom: "15px",
+            boxShadow:
+              "0 2px 5px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h3>{repo.repo_name}</h3>
 
-          return a.repo_name.localeCompare(
-            b.repo_name
-          );
-        })
-        .map((repo) => (
-          <div
-            key={repo.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "10px",
-              padding: "15px",
-              marginBottom: "15px",
-              boxShadow:
-                "0 2px 5px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h3>{repo.repo_name}</h3>
+          <p>
+            <strong>Owner:</strong> {repo.owner_name}
+          </p>
 
-            <p>
-              <strong>Owner:</strong>{" "}
-              {repo.owner_name}
-            </p>
+          <p>
+            <strong>Language:</strong> {repo.language}
+          </p>
 
-            <p>
-              <strong>Language:</strong>{" "}
-              {repo.language}
-            </p>
+          <p>
+            <strong>Stars:</strong> {repo.stars}
+          </p>
 
-            <p>
-              <strong>Stars:</strong>{" "}
-              {repo.stars}
-            </p>
+          <p>
+            <strong>Description:</strong>{" "}
+            {repo.description}
+          </p>
 
-            <p>
-              <strong>Description:</strong>{" "}
-              {repo.description}
-            </p>
-
+          <div style={{ marginTop: "10px" }}>
             <button
               onClick={() =>
                 analyzeRepository(repo.id)
               }
               style={{
-                marginTop: "10px",
+                marginRight: "10px",
                 padding: "8px 12px",
                 cursor: "pointer",
               }}
             >
               Analyze Repository
             </button>
+
+            <button
+              onClick={() =>
+                deleteRepository(repo.id)
+              }
+              style={{
+                padding: "8px 12px",
+                cursor: "pointer",
+                backgroundColor: "#ff4d4f",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+              }}
+            >
+              Delete Repository
+            </button>
           </div>
-        ))}
+        </div>
+      ))}
     </div>
   );
 }
