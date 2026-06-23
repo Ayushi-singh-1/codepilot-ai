@@ -6,6 +6,7 @@ function App() {
   const [repositories, setRepositories] = useState([]);
   const [analysis, setAnalysis] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortType, setSortType] = useState("stars");
 
   const fetchRepositories = async () => {
     try {
@@ -133,28 +134,23 @@ function App() {
           <h2>📊 Repository Analysis</h2>
 
           <p>
-            <strong>Repository:</strong>{" "}
-            {analysis.repository}
+            <strong>Repository:</strong> {analysis.repository}
           </p>
 
           <p>
-            <strong>Owner:</strong>{" "}
-            {analysis.owner}
+            <strong>Owner:</strong> {analysis.owner}
           </p>
 
           <p>
-            <strong>Language:</strong>{" "}
-            {analysis.language}
+            <strong>Language:</strong> {analysis.language}
           </p>
 
           <p>
-            <strong>Stars:</strong>{" "}
-            {analysis.stars}
+            <strong>Stars:</strong> {analysis.stars}
           </p>
 
           <p>
-            <strong>Health Score:</strong>{" "}
-            {analysis.healthScore}
+            <strong>Health Score:</strong> {analysis.healthScore}
           </p>
 
           <p>
@@ -163,8 +159,7 @@ function App() {
           </p>
 
           <p>
-            <strong>Summary:</strong>{" "}
-            {analysis.summary}
+            <strong>Summary:</strong> {analysis.summary}
           </p>
 
           <p>
@@ -204,6 +199,29 @@ function App() {
 
       <h2>Imported Repositories</h2>
 
+      {/* Sorting */}
+      <div style={{ marginBottom: "20px" }}>
+        <button
+          onClick={() => setSortType("stars")}
+          style={{
+            marginRight: "10px",
+            padding: "8px 12px",
+          }}
+        >
+          Sort By Stars
+        </button>
+
+        <button
+          onClick={() => setSortType("name")}
+          style={{
+            padding: "8px 12px",
+          }}
+        >
+          Sort By Name
+        </button>
+      </div>
+
+      {/* Search */}
       <div style={{ marginBottom: "20px" }}>
         <input
           type="text"
@@ -227,6 +245,15 @@ function App() {
             ?.toLowerCase()
             .includes(searchTerm.toLowerCase())
         )
+        .sort((a, b) => {
+          if (sortType === "stars") {
+            return (b.stars || 0) - (a.stars || 0);
+          }
+
+          return a.repo_name.localeCompare(
+            b.repo_name
+          );
+        })
         .map((repo) => (
           <div
             key={repo.id}
