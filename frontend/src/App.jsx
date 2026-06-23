@@ -7,7 +7,8 @@ function App() {
   const [analysis, setAnalysis] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortType, setSortType] = useState("stars");
-
+  const [loadingImport, setLoadingImport] = useState(false);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
   const fetchRepositories = async () => {
     try {
       const response = await axios.get(
@@ -23,12 +24,14 @@ function App() {
   useEffect(() => {
     fetchRepositories();
   }, []);
-
+  
   const importRepository = async () => {
     if (!githubUrl.includes("github.com")) {
       alert("Please enter a valid GitHub URL");
       return;
     }
+
+    setLoadingImport(true);
 
     try {
       await axios.post(
@@ -47,12 +50,15 @@ function App() {
 
       alert(
         error.response?.data?.error ||
-          "Failed to import repository"
+        "Failed to import repository"
       );
+    } finally {
+      setLoadingImport(false);
     }
   };
-
   const analyzeRepository = async (id) => {
+    setLoadingAnalysis(true);
+
     try {
       const response = await axios.get(
         `http://localhost:5000/api/analysis/${id}`
@@ -62,8 +68,11 @@ function App() {
     } catch (error) {
       console.error(error);
       alert("Analysis failed");
+    } finally {
+      setLoadingAnalysis(false);
     }
   };
+
 
   const deleteRepository = async (id) => {
     const confirmDelete = window.confirm(
@@ -153,7 +162,9 @@ function App() {
             cursor: "pointer",
           }}
         >
-          Import Repository
+          {loadingImport
+            ? "Importing..."
+            : "Import Repository"}
         </button>
       </div>
 
@@ -314,7 +325,9 @@ function App() {
                 cursor: "pointer",
               }}
             >
-              Analyze Repository
+              {loadingAnalysis
+                ? "Analyzing..."
+                : "Analyze Repository"}
             </button>
 
             <button
